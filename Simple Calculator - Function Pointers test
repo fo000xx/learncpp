@@ -1,0 +1,76 @@
+#include <iostream>
+#include <functional>
+
+using ArithmeticFunction = std::function<int(int, int)>;
+
+int getInt()
+{
+    int x{};    
+
+    std::cout << "Enter an integer: ";
+    std::cin >> x;
+
+    return x;
+}
+
+char getOperator()
+{
+    char c{};
+    do
+    {
+        std::cout << "Enter an operator ('+', '-', '*', '/'): ";
+        std::cin >> c;
+    } while (c!='+' && c!='-' && c!='*' && c!='/');
+    
+    return c;
+}
+
+int add(int x, int y)
+{
+    return x + y;
+}
+
+int subtract(int x, int y)
+{
+    return x - y;
+}
+
+int multiply(int x, int y)
+{
+    return x * y;
+}
+
+int divide(int x, int y)
+{
+    return x / y;
+}
+
+ArithmeticFunction getArithmeticFunction(char oprtr)
+{  
+    //switch statement to complet the calculation
+    switch (oprtr)
+    {
+        case '+': return &add;
+        case '-': return &subtract;
+        case '*': return &multiply;
+        case '/': return &divide;
+    }
+
+    return nullptr;
+}
+
+int main()
+{
+    //get two ints from user
+    int x{ getInt() };
+    int y{ getInt() };
+
+    //get mathematical operation from user
+    char oprtr{ getOperator() };
+
+    ArithmeticFunction fcn { getArithmeticFunction(oprtr) };
+    if (fcn)
+        std::cout << x << ' ' << oprtr << ' ' << y << " = " << fcn(x, y) << '\n';
+
+    return 0;
+}
