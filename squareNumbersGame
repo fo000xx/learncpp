@@ -1,0 +1,121 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <chrono>
+
+using Numbers = std::vector<int>;
+
+namespace config
+{
+    int min_multiplier{ 2 };
+    int max_multiplier{ 4 };
+    int out_by{ 4 };
+}
+
+//generate the vector containing all of the numbers the user needs to guess
+Numbers generateNumbers(int start, int count, int multi)
+{    
+    Numbers numbers(static_cast<Numbers::size_type>(count));
+    for (auto& number : numbers)
+    {
+        number = ((start * start) * multi);
+        ++start;
+    }
+
+    return numbers;
+}
+
+Numbers getGameConfig(int multi)
+{
+    int start{};
+    std::cout << "Start where?: ";
+    std::cin >> start;
+    
+    int count{};
+    std::cout << "How many?: ";
+    std::cin >> count;
+
+    Numbers numbers{ generateNumbers(start, count, multi) };
+
+    return numbers;
+}
+
+int closestMatch(int guess, const Numbers& numbers)
+{
+    //lambda for finding the closest value
+    auto closest{
+        [=](const auto& a, const auto& b)
+        {
+            return (std::abs(a - guess) < std::abs(b - guess));
+        }
+    };
+
+    //return the closest value
+    return *std::min_element(numbers.begin(), numbers.end(), closest);
+}
+
+void printSuccess(const Numbers& numbers)
+{
+    std::cout << "Nice! " << numbers.size() << " left.\n";
+}
+
+void printFailure(const Numbers& numbers, int guess)
+{
+    std::cout << guess << " is wrong.";
+    
+    //if the match is within config::out_by of a value, tell the user.
+    int closest{ closestMatch(guess, numbers) };
+    
+    if (std::abs(closest - guess) < config::out_by)
+    {
+        std::cout << " Try " << closest << " next time\n";
+    }
+    else
+    {
+        std::cout << '\n';
+    }
+}
+
+bool playGame(Numbers& numbers)
+{
+    int guess{};
+    std::cin >> guess;
+
+    //take above user input and search the vector for it
+    auto found{ std::find(numbers.begin(), numbers.end(), guess) };
+
+    //remove from the available numbers if it's found
+    if (found != numbers.end())
+    {
+        numbers.erase(found);
+        printSuccess(numbers);
+        return true;
+    }
+    
+    //otherwise, search for the closest number (within namespace::out_by), print and end game.
+    else
+    { 
+        printFailure(numbers, guess);
+        return false;
+    }
+}
+
+int main()
+{
+    //Generate a random number between 2 and 4
+    std::mt19937 mt{ static_cast<std::mt19937::result_type>(std::time(nullptr)) };
+    std::uniform_int_distribution multiplier{ config::min_multiplier, config::max_multiplier };
+    int multi { multiplier(mt) };
+    
+    //generate the numbers
+    Numbers numbers{ getGameConfig(multi) };
+
+    //Tell the user how many numbers have been generated and by what multiple
+    std::cout << "I have generated " << numbers.size() << " square numbers. Do you know what each number is after multiplying it by " 
+        << multi << "?\n";
+
+    //play the game
+    while(playGame(numbers));
+
+    return 0;
+}
