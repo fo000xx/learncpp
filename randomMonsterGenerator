@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <array>
 
+constexpr int g_maxHitpoints{ 100 }; //max hp of the monsters
+
 //Monster class, include variables and functions needed to generate the monster
 class Monster
 {
@@ -82,7 +84,7 @@ public:
     { 
         //get random HP and monstertype - convert monstertype to int and back again
         auto monstertype{ static_cast<Monster::Type>(getRandomNumber(0, static_cast<int>(Monster::Type::max_monster_types) - 1)) };
-        int monsterHP{ getRandomNumber(0, 100) };
+        int monsterHP{ getRandomNumber(0, g_maxHitpoints) };
 
         //pull random name and roar from the arrays above 
         auto name{ s_names[getRandomNumber(0, s_names.size() - 1)]};
