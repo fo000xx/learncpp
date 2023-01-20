@@ -1,0 +1,104 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <ctime>
+#include <cstdlib>
+#include <array>
+
+//Monster class, include variables and functions needed to generate the monster
+class Monster
+{
+public:
+    enum class Type
+{
+    dragon,
+    goblin,
+    ogre,
+    orc,
+    skeleton,
+    troll,
+    vampire,
+    zombie,
+
+    max_monster_types,
+};
+
+private:
+    Type m_type{};
+    std::string m_name{};
+    std::string m_roar{};
+    int m_hitpoints{};
+
+public:
+    //Monster constructor
+    Monster(Type type, const std::string_view name, const std::string_view roar, int hp)
+        : m_type{type}, m_name{name}, m_roar{roar}, m_hitpoints{hp}
+    {
+    }
+
+    //return type of monster as a string for printing
+    std::string getTypeString(Monster::Type& type) const
+    {
+        switch (type)
+        {
+            case Monster::Type::dragon:     return "dragon";
+            case Monster::Type::goblin:     return "goblin";
+            case Monster::Type::ogre:       return "ogre";
+            case Monster::Type::orc:        return "orc";
+            case Monster::Type::skeleton:   return "skeleton";
+            case Monster::Type::troll:      return "troll";
+            case Monster::Type::vampire:    return "vampire";
+            case Monster::Type::zombie:     return "zombie";
+            default:
+                return "Incorrect monster type";
+        }
+    }
+
+    //print the monster and monster attributes
+    void print()
+    {
+        std::cout << m_name << " the " << getTypeString(m_type) << " has " << m_hitpoints << " hit points and says " << m_roar << '\n';
+    }
+};
+
+//class to generate monster with random attributes
+class MonsterGenerator
+{
+private:
+    static constexpr std::array s_names{ "Ben", "Phil", "Chris", "Brad", "Dean", "Emma"};
+    static constexpr std::array s_roar{ "Give  me MILK!", "Feet!", "Might get a Menu Log", "Hi guys I am a divemaster", "Smash?", "I love bread"};
+
+public:
+
+    //get a random number between max and min
+    static int getRandomNumber(int min, int max)
+    {
+        static constexpr double fraction{ 1.0 / (static_cast<double>(RAND_MAX) + 1.0) };
+
+        return static_cast<int>(std::rand() * fraction * (max - min + 1) + min);
+    }
+    
+    static Monster generateMonster()
+    { 
+        //get random HP and monstertype - convert monstertype to int and back again
+        auto monstertype{ static_cast<Monster::Type>(getRandomNumber(0, static_cast<int>(Monster::Type::max_monster_types) - 1)) };
+        int monsterHP{ getRandomNumber(0, 100) };
+
+        //pull random name and roar from the arrays above 
+        auto name{ s_names[getRandomNumber(0, s_names.size() - 1)]};
+        auto roar{ s_roar[getRandomNumber(0, s_roar.size() - 1)]};
+
+        return { Monster(monstertype, name, roar, monsterHP) };
+    }
+};
+
+int main()
+{
+    std::srand(static_cast<unsigned int>(std::time(nullptr))); // set initial seed value to system clock
+	std::rand();
+    
+    Monster m{ MonsterGenerator::generateMonster() };
+    m.print();
+
+    return 0;
+}
